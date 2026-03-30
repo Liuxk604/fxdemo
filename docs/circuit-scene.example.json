@@ -1,0 +1,613 @@
+{
+  "version": "1.0",
+  "document_id": "fxdemo-problem-q3-sample",
+  "source": {
+    "file_name": "题目3.png",
+    "mime_type": "image/png",
+    "image_width": 1183,
+    "image_height": 600,
+    "problem_text": "如图所示，闭合开关后调节滑动变阻器，观察电压表示数变化。",
+    "source_kind": "upload"
+  },
+  "canvas": {
+    "view_box": [0, 0, 1183, 600],
+    "unit": "px",
+    "background": "#ffffff",
+    "original_aspect_ratio": 1.9716666667
+  },
+  "vision": {
+    "confidence": 0.93,
+    "ocr_blocks": [
+      {
+        "id": "ocr_1",
+        "text": "R1",
+        "bbox": [275, 74, 62, 28],
+        "confidence": 0.98
+      },
+      {
+        "id": "ocr_2",
+        "text": "R2",
+        "bbox": [495, 74, 64, 28],
+        "confidence": 0.97
+      },
+      {
+        "id": "ocr_3",
+        "text": "V",
+        "bbox": [258, 212, 30, 28],
+        "confidence": 0.99
+      },
+      {
+        "id": "ocr_4",
+        "text": "S",
+        "bbox": [553, 335, 26, 24],
+        "confidence": 0.98
+      }
+    ],
+    "component_detections": [
+      {
+        "id": "det_r1",
+        "type": "resistor",
+        "bbox": [255, 96, 120, 36],
+        "confidence": 0.95
+      },
+      {
+        "id": "det_r2",
+        "type": "variable_resistor",
+        "bbox": [480, 95, 160, 44],
+        "confidence": 0.92
+      },
+      {
+        "id": "det_v1",
+        "type": "voltmeter",
+        "bbox": [228, 182, 84, 84],
+        "confidence": 0.98
+      },
+      {
+        "id": "det_sw1",
+        "type": "switch",
+        "bbox": [548, 297, 92, 50],
+        "confidence": 0.94
+      },
+      {
+        "id": "det_b1",
+        "type": "battery",
+        "bbox": [305, 318, 60, 72],
+        "confidence": 0.96
+      }
+    ],
+    "wire_segments": [
+      {
+        "id": "seg_1",
+        "kind": "line",
+        "points": [[180, 120], [700, 120]],
+        "confidence": 0.99
+      },
+      {
+        "id": "seg_2",
+        "kind": "line",
+        "points": [[180, 120], [180, 352]],
+        "confidence": 0.99
+      },
+      {
+        "id": "seg_3",
+        "kind": "line",
+        "points": [[700, 120], [700, 352]],
+        "confidence": 0.99
+      }
+    ],
+    "issues": [],
+    "evidence_crops": [
+      {
+        "id": "crop_r2",
+        "target_id": "det_r2",
+        "bbox": [470, 70, 190, 86]
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "resistor_1",
+      "type": "resistor",
+      "bbox": [286, 106, 92, 28],
+      "center": { "x": 332, "y": 120 },
+      "rotation": 0,
+      "symbol_variant": "rectangle",
+      "anchors": {
+        "left": { "x": 286, "y": 120 },
+        "right": { "x": 378, "y": 120 }
+      },
+      "params": {
+        "resistance_ohm": 10
+      },
+      "label_refs": ["label_r1"],
+      "style": {
+        "stroke": "#1f2e2b",
+        "stroke_width": 4,
+        "fill": "#ffffff"
+      },
+      "sim_ref": "R1",
+      "confidence": 0.96
+    },
+    {
+      "id": "rheostat_1",
+      "type": "variable_resistor",
+      "bbox": [500, 106, 112, 28],
+      "center": { "x": 556, "y": 120 },
+      "rotation": 0,
+      "symbol_variant": "rheostat_with_slider",
+      "anchors": {
+        "left": { "x": 500, "y": 120 },
+        "right": { "x": 612, "y": 120 },
+        "slider": { "x": 542, "y": 78 }
+      },
+      "params": {
+        "resistance_min_ohm": 2,
+        "resistance_max_ohm": 50,
+        "slider_ratio": 0.25
+      },
+      "label_refs": ["label_r2", "label_p"],
+      "style": {
+        "stroke": "#1f2e2b",
+        "stroke_width": 4,
+        "fill": "#ffffff"
+      },
+      "sim_ref": "R2",
+      "confidence": 0.93
+    },
+    {
+      "id": "voltmeter_1",
+      "type": "voltmeter",
+      "bbox": [278, 182, 56, 56],
+      "center": { "x": 306, "y": 210 },
+      "rotation": 0,
+      "symbol_variant": "circle_meter",
+      "anchors": {
+        "left": { "x": 278, "y": 210 },
+        "right": { "x": 334, "y": 210 }
+      },
+      "params": {
+        "measuring_target": "resistor_1",
+        "unit": "V"
+      },
+      "label_refs": ["label_v1"],
+      "style": {
+        "stroke": "#1f2e2b",
+        "stroke_width": 4,
+        "fill": "#ffffff"
+      },
+      "sim_ref": "V1",
+      "confidence": 0.98
+    },
+    {
+      "id": "battery_1",
+      "type": "battery",
+      "bbox": [332, 324, 22, 56],
+      "center": { "x": 343, "y": 352 },
+      "rotation": 90,
+      "symbol_variant": "single_cell",
+      "anchors": {
+        "negative": { "x": 332, "y": 352 },
+        "positive": { "x": 354, "y": 352 }
+      },
+      "params": {
+        "voltage_v": 12
+      },
+      "label_refs": [],
+      "style": {
+        "stroke": "#1f2e2b",
+        "stroke_width": 4,
+        "fill": "none"
+      },
+      "sim_ref": "E1",
+      "confidence": 0.96
+    },
+    {
+      "id": "switch_1",
+      "type": "switch",
+      "bbox": [560, 292, 60, 30],
+      "center": { "x": 590, "y": 307 },
+      "rotation": 0,
+      "symbol_variant": "single_throw",
+      "anchors": {
+        "left": { "x": 560, "y": 352 },
+        "right": { "x": 620, "y": 352 }
+      },
+      "params": {
+        "closed": true
+      },
+      "label_refs": ["label_s1"],
+      "style": {
+        "stroke": "#1f2e2b",
+        "stroke_width": 4,
+        "fill": "none"
+      },
+      "sim_ref": "S1",
+      "confidence": 0.94
+    }
+  ],
+  "wires": [
+    {
+      "id": "wire_top_left",
+      "from": "node_left_top",
+      "to": "resistor_1.left",
+      "net_id": "n_top_left",
+      "route": {
+        "kind": "polyline",
+        "points": [
+          { "x": 180, "y": 120 },
+          { "x": 286, "y": 120 }
+        ]
+      },
+      "stroke": {
+        "color": "#1f2e2b",
+        "width": 4.5
+      },
+      "topology_role": "main"
+    },
+    {
+      "id": "wire_top_mid",
+      "from": "resistor_1.right",
+      "to": "rheostat_1.left",
+      "net_id": "n_top_mid",
+      "route": {
+        "kind": "polyline",
+        "points": [
+          { "x": 378, "y": 120 },
+          { "x": 430, "y": 120 },
+          { "x": 500, "y": 120 }
+        ]
+      },
+      "stroke": {
+        "color": "#1f2e2b",
+        "width": 4.5
+      },
+      "topology_role": "main"
+    },
+    {
+      "id": "wire_top_right",
+      "from": "rheostat_1.right",
+      "to": "node_right_top",
+      "net_id": "n_top_right",
+      "route": {
+        "kind": "polyline",
+        "points": [
+          { "x": 612, "y": 120 },
+          { "x": 700, "y": 120 }
+        ]
+      },
+      "stroke": {
+        "color": "#1f2e2b",
+        "width": 4.5
+      },
+      "topology_role": "main"
+    },
+    {
+      "id": "wire_right_vertical",
+      "from": "node_right_top",
+      "to": "switch_1.right",
+      "net_id": "n_right",
+      "route": {
+        "kind": "polyline",
+        "points": [
+          { "x": 700, "y": 120 },
+          { "x": 700, "y": 352 },
+          { "x": 620, "y": 352 }
+        ]
+      },
+      "stroke": {
+        "color": "#1f2e2b",
+        "width": 4.5
+      },
+      "topology_role": "main"
+    },
+    {
+      "id": "wire_bottom_mid",
+      "from": "switch_1.left",
+      "to": "battery_1.positive",
+      "net_id": "n_bottom_mid",
+      "route": {
+        "kind": "polyline",
+        "points": [
+          { "x": 560, "y": 352 },
+          { "x": 354, "y": 352 }
+        ]
+      },
+      "stroke": {
+        "color": "#1f2e2b",
+        "width": 4.5
+      },
+      "topology_role": "main"
+    },
+    {
+      "id": "wire_bottom_left",
+      "from": "battery_1.negative",
+      "to": "node_left_bottom",
+      "net_id": "n_bottom_left",
+      "route": {
+        "kind": "polyline",
+        "points": [
+          { "x": 332, "y": 352 },
+          { "x": 180, "y": 352 }
+        ]
+      },
+      "stroke": {
+        "color": "#1f2e2b",
+        "width": 4.5
+      },
+      "topology_role": "main"
+    },
+    {
+      "id": "wire_left_vertical",
+      "from": "node_left_bottom",
+      "to": "node_left_top",
+      "net_id": "n_left",
+      "route": {
+        "kind": "polyline",
+        "points": [
+          { "x": 180, "y": 352 },
+          { "x": 180, "y": 120 }
+        ]
+      },
+      "stroke": {
+        "color": "#1f2e2b",
+        "width": 4.5
+      },
+      "topology_role": "main"
+    },
+    {
+      "id": "wire_voltmeter_branch_left",
+      "from": "node_left_mid",
+      "to": "voltmeter_1.left",
+      "net_id": "n_branch_left",
+      "route": {
+        "kind": "polyline",
+        "points": [
+          { "x": 180, "y": 210 },
+          { "x": 278, "y": 210 }
+        ]
+      },
+      "stroke": {
+        "color": "#1f2e2b",
+        "width": 4.5
+      },
+      "topology_role": "measurement"
+    },
+    {
+      "id": "wire_voltmeter_branch_right",
+      "from": "voltmeter_1.right",
+      "to": "node_top_center",
+      "net_id": "n_branch_right",
+      "route": {
+        "kind": "polyline",
+        "points": [
+          { "x": 334, "y": 210 },
+          { "x": 430, "y": 210 },
+          { "x": 430, "y": 120 }
+        ]
+      },
+      "stroke": {
+        "color": "#1f2e2b",
+        "width": 4.5
+      },
+      "topology_role": "measurement"
+    },
+    {
+      "id": "wire_slider",
+      "from": "rheostat_1.slider",
+      "to": "rheostat_1.right",
+      "net_id": "n_slider",
+      "route": {
+        "kind": "svg_path",
+        "d": "M542 78 L612 78 L612 120"
+      },
+      "stroke": {
+        "color": "#1f2e2b",
+        "width": 4.5
+      },
+      "topology_role": "slider_link"
+    }
+  ],
+  "junctions": [
+    {
+      "id": "node_left_top",
+      "x": 180,
+      "y": 120,
+      "kind": "connected_dot"
+    },
+    {
+      "id": "node_right_top",
+      "x": 700,
+      "y": 120,
+      "kind": "connected_dot"
+    },
+    {
+      "id": "node_left_bottom",
+      "x": 180,
+      "y": 352,
+      "kind": "connected_dot"
+    },
+    {
+      "id": "node_top_center",
+      "x": 430,
+      "y": 120,
+      "kind": "connected_dot"
+    },
+    {
+      "id": "node_left_mid",
+      "x": 180,
+      "y": 210,
+      "kind": "terminal_marker"
+    }
+  ],
+  "labels": [
+    {
+      "id": "label_r1",
+      "text": "R1",
+      "position": { "x": 332, "y": 92 },
+      "bbox": [308, 72, 48, 24],
+      "font_size": 18,
+      "rotation": 0,
+      "belongs_to": "resistor_1"
+    },
+    {
+      "id": "label_r2",
+      "text": "R2",
+      "position": { "x": 556, "y": 92 },
+      "bbox": [534, 72, 44, 24],
+      "font_size": 18,
+      "rotation": 0,
+      "belongs_to": "rheostat_1"
+    },
+    {
+      "id": "label_p",
+      "text": "P",
+      "position": { "x": 542, "y": 58 },
+      "bbox": [536, 46, 18, 18],
+      "font_size": 18,
+      "rotation": 0,
+      "belongs_to": "rheostat_1"
+    },
+    {
+      "id": "label_v1",
+      "text": "V",
+      "position": { "x": 306, "y": 218 },
+      "bbox": [298, 208, 16, 18],
+      "font_size": 18,
+      "rotation": 0,
+      "belongs_to": "voltmeter_1"
+    },
+    {
+      "id": "label_s1",
+      "text": "S",
+      "position": { "x": 590, "y": 312 },
+      "bbox": [582, 302, 16, 18],
+      "font_size": 18,
+      "rotation": 0,
+      "belongs_to": "switch_1"
+    }
+  ],
+  "netlist": {
+    "nodes": [
+      { "id": "n1", "meaning": "battery_negative_and_left_bus" },
+      { "id": "n2", "meaning": "after_r1_before_r2" },
+      { "id": "n3", "meaning": "right_bus_and_switch_right" },
+      { "id": "n4", "meaning": "battery_positive_and_switch_left" }
+    ],
+    "edges": [
+      {
+        "component_id": "battery_1",
+        "from_node": "n1",
+        "to_node": "n4"
+      },
+      {
+        "component_id": "resistor_1",
+        "from_node": "n1",
+        "to_node": "n2"
+      },
+      {
+        "component_id": "rheostat_1",
+        "from_node": "n2",
+        "to_node": "n3"
+      },
+      {
+        "component_id": "switch_1",
+        "from_node": "n4",
+        "to_node": "n3"
+      },
+      {
+        "component_id": "voltmeter_1",
+        "from_node": "n1",
+        "to_node": "n2"
+      }
+    ]
+  },
+  "simulation": {
+    "adjustables": [
+      {
+        "id": "adj_switch_1",
+        "type": "boolean",
+        "target": "switch_1.params.closed"
+      },
+      {
+        "id": "adj_rheostat_slider",
+        "type": "range",
+        "target": "rheostat_1.params.slider_ratio",
+        "min": 0,
+        "max": 1,
+        "step": 0.01
+      }
+    ],
+    "measurements": [
+      {
+        "id": "m_voltage_r1",
+        "type": "voltage",
+        "meter_component_id": "voltmeter_1",
+        "target_component_id": "resistor_1",
+        "unit": "V"
+      }
+    ],
+    "initial_state": {
+      "switch_1.closed": true,
+      "rheostat_1.slider_ratio": 0.25
+    },
+    "constraints": [
+      "voltmeter_1 is ideal meter",
+      "switch_1.open => total_current = 0"
+    ],
+    "solver_hint": {
+      "kind": "dc_resistive",
+      "notes": "R1 and R2 series, voltmeter across R1"
+    }
+  },
+  "interaction": {
+    "click_targets": [
+      {
+        "component_id": "switch_1",
+        "action": "toggle_boolean",
+        "target": "switch_1.params.closed"
+      }
+    ],
+    "drag_targets": [
+      {
+        "component_id": "rheostat_1",
+        "anchor": "slider",
+        "action": "update_ratio",
+        "target": "rheostat_1.params.slider_ratio",
+        "axis": "x",
+        "range": [520, 592]
+      }
+    ],
+    "highlights": [
+      {
+        "when": "switch_1.params.closed == true",
+        "target_wire_ids": [
+          "wire_top_left",
+          "wire_top_mid",
+          "wire_top_right",
+          "wire_right_vertical",
+          "wire_bottom_mid",
+          "wire_bottom_left",
+          "wire_left_vertical"
+        ]
+      }
+    ]
+  },
+  "rendering": {
+    "prefer_symbol_library": true,
+    "prefer_original_geometry": true,
+    "fallback_overlay_svg": null,
+    "z_order": [
+      "wires",
+      "junctions",
+      "components",
+      "labels",
+      "interaction_highlight"
+    ]
+  },
+  "validation": {
+    "topology_consistent": true,
+    "all_components_connected": true,
+    "ocr_verified": true,
+    "manual_review_required": false
+  }
+}

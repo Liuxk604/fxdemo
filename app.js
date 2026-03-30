@@ -1,6 +1,6 @@
 ﻿const q1 = {
   source: "manual_fine_grained_q1",
-  viewBox: "0 0 900 520",
+  viewBox: "120 52 560 330",
   batteryVoltage: 1.5,
   lamps: [
     { id: "L1", cx: 285, cy: 192, r: 24 },
@@ -30,7 +30,7 @@
 
 const q2 = {
   source: "manual_fine_grained_q2",
-  viewBox: "0 0 980 620",
+  viewBox: "160 76 560 420",
   geometry: {
     leftX: 210,
     sourceX: 340,
@@ -72,7 +72,7 @@ const q2 = {
 
 const q3 = {
   source: "manual_fine_grained_q3",
-  viewBox: "0 0 920 520",
+  viewBox: "150 72 560 320",
   batteryVoltage: 12,
   r1: 10,
   r2Min: 2,
@@ -116,8 +116,8 @@ const q3 = {
 const state = {
   selectedCase: "q1",
   q1: { switchClosed: false },
-  q2: { switchClosed: true, slider: 62 },
-  q3: { switchClosed: true, slider: 25 }
+  q2: { switchClosed: false, slider: 62 },
+  q3: { switchClosed: false, slider: 25 }
 };
 
 const caseMeta = {
@@ -376,7 +376,7 @@ function q2BatterySymbol() {
       <line x1="${g.batteryShortLeft}" y1="${g.batteryShortY}" x2="${g.batteryShortRight}" y2="${g.batteryShortY}" class="component-line"></line>
       <line x1="${g.batteryLongLeft}" y1="${g.batteryLongY}" x2="${g.batteryLongRight}" y2="${g.batteryLongY}" class="component-line"></line>
       <line x1="${g.sourceX}" y1="${g.batteryLongY + 12}" x2="${g.sourceX}" y2="${g.bottomY}" class="component-line"></line>
-      <text x="${g.sourceX - 28}" y="${g.batteryLongY + 48}" class="sub-label">E, r</text>
+      <text x="${g.sourceX - 40}" y="${g.batteryLongY + 48}" class="sub-label">E, r</text>
     </g>
   `;
 }
@@ -798,6 +798,9 @@ function renderApp() {
     state.selectedCase === "q2" ? renderQ2() :
     state.selectedCase === "q3" ? renderQ3() :
     renderUploadPage();
+  const footerTitle = current.footerTitle || "说明";
+  const parametersTitle = current.parametersTitle || "关键参数";
+  const lawsTitle = current.lawsTitle || "规律提示";
   app.innerHTML = `
     <section class="stage">
       ${renderTabs()}
@@ -834,15 +837,15 @@ function renderApp() {
       </div>
       <div class="bottom-panels bottom-panels--full">
             <div class="panel-card">
-              <div class="panel-card__label">${current.footerTitle}</div>
+              <div class="panel-card__label">${footerTitle}</div>
               <p>${current.footerDesc}</p>
             </div>
             <div class="panel-card">
-              <div class="panel-card__label">关键参数</div>
+              <div class="panel-card__label">${parametersTitle}</div>
               ${current.parameters}
             </div>
             <div class="panel-card">
-              <div class="panel-card__label">规律提示</div>
+              <div class="panel-card__label">${lawsTitle}</div>
               ${current.laws}
             </div>
       </div>
