@@ -60,15 +60,17 @@ http://localhost:8080
   - 输出标准化 `scene`
 - `app.js`
   - 固定题目 1/2/3 的页面与交互
-- `upload.js`
-  - 上传题目页的历史实现
-  - 这个文件已经积累了多轮覆盖式修改，内部存在多套重复定义
-- `upload-final.js`
-  - 当前新增的“上传页最终覆盖层”
-  - 目的是不再继续直接污染 `upload.js`
-  - 负责上传页最终 UI 文案、渲染覆盖、以及部分 scene 规范化
+- `upload-v2.js`
+  - 上传题目页的当前实现入口
+  - 负责上传、上传页 UI、scene 预处理、校验结果展示与 SVG 渲染
+- `upload.js` / `upload-final.js`
+  - 历史实现，当前已不再从 `index.html` 加载
+  - 保留仅用于回溯之前的尝试，不应继续在其上叠加新逻辑
 - `styles.css`
   - 页面样式
+- `lib/scene-document.js`
+  - 统一 scene document 规范化
+  - 保留 `vision / netlist / interaction / rendering / validation` 等层
 - `docs/circuit-scene.example.json`
   - 更理想的中间态 schema 参考
 - `scripts/test-samples.js`
