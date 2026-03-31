@@ -1122,17 +1122,14 @@
   function uploadMeta(scene) {
     if (!scene) {
       return {
-        title: "上传题目：通用识图与实验生成",
-        desc: "上传任意电路题图片，系统会先生成结构化中间态，再做拓扑校验、锚点吸附和交互渲染。"
+        title: "上传题目",
+        desc: "上传题图后生成可交互电路实验。"
       };
     }
 
-    const gatePassed = scene.validation?.quality_gate_passed;
     return {
-      title: scene.title || "上传题目：电路图复刻结果",
-      desc: gatePassed
-        ? (scene.summary || "已生成可交互的电路图复刻结果。")
-        : "当前结果已生成，但校验提示仍存在结构风险，建议结合原图复核。"
+      title: scene.title || "上传题目",
+      desc: scene.summary || "已生成电路图复刻结果。"
     };
   }
 
@@ -1168,7 +1165,7 @@
       }) === index;
     });
     if (!adjustables.length) {
-      return `<div class="hint">当前结果没有返回可调参数，先展示结构复刻结果。</div>`;
+      return "";
     }
 
     return adjustables.map((item) => {
@@ -1199,7 +1196,7 @@
           <div class="upload-empty">
             <div class="upload-empty__icon">+</div>
             <div class="upload-empty__title">上传电路题图片</div>
-            <div class="upload-empty__desc">支持 JPG / JPEG / PNG。上传后会先生成 scene 中间态，再输出可交互电路图。</div>
+            <div class="upload-empty__desc">支持 JPG / JPEG / PNG。</div>
           </div>
           ${state.upload.loading ? `
             <div class="upload-loading-mask">
@@ -1254,7 +1251,6 @@
       <div class="preview-card">
         <div class="preview-card__title">原始题图</div>
         <img src="${state.upload.previewUrl}" alt="${escapeUploadHtml(state.upload.fileName || "上传题图")}" />
-        <div class="preview-card__meta">${escapeUploadHtml(state.upload.fileName)}${state.upload.fileSize ? ` · ${formatUploadBytes(state.upload.fileSize)}` : ""}</div>
       </div>
     `;
   };
@@ -1263,18 +1259,12 @@
     const scene = state.upload.scene;
     const meta = uploadMeta(scene);
     const adjustables = scene?.simulation?.adjustables || [];
-    const issueCount = scene?.validation?.issues?.length || 0;
-    const badges = [
-      state.upload.loading ? "状态：生成中" : scene ? "状态：生成成功" : "状态：待上传",
-      scene ? `组件：${scene.components?.length || 0}` : "输入：任意题图",
-      scene ? `校验：${issueCount ? `${issueCount}项` : "通过"}` : "模型：gpt-5.4"
-    ];
 
     return {
       title: meta.title,
       desc: meta.desc,
-      badges,
-      accentIndex: 2,
+      badges: [],
+      accentIndex: 0,
       svg: `
         ${state.upload.successMessage ? `<div class="upload-status upload-status--success">${escapeUploadHtml(state.upload.successMessage)}</div>` : ""}
         ${state.upload.error ? `<div class="upload-status upload-status--error">${escapeUploadHtml(state.upload.error)}</div>` : ""}
@@ -1284,7 +1274,7 @@
       footerDesc: state.upload.loading
         ? "正在调用多模态模型识别题图，请等待结果返回。"
         : (scene?.normalization?.note || "当前结果已完成上传页归一化。"),
-      parametersTitle: "中间态信息",
+      parametersTitle: "关键参数",
       parameters: scene ? `
         <div class="kv-list">
           <div class="kv-item"><span>组件总数</span><strong>${scene.components?.length || 0}</strong></div>
@@ -1293,13 +1283,7 @@
           <div class="kv-item"><span>模板分类</span><strong>${escapeUploadHtml(scene.normalization?.template || "generic")}</strong></div>
           <div class="kv-item"><span>结构摘要</span><strong>${escapeUploadHtml(uploadSummary(scene) || "暂无")}</strong></div>
         </div>
-      ` : `
-        <div class="kv-list">
-          <div class="kv-item"><span>识别方式</span><strong>题图 -> scene 文档</strong></div>
-          <div class="kv-item"><span>输出格式</span><strong>SVG / HTML</strong></div>
-          <div class="kv-item"><span>关键步骤</span><strong>解析 / 归一化 / 校验 / 渲染</strong></div>
-        </div>
-      `,
+      ` : ``,
       lawsTitle: "校验与交互",
       laws: scene ? renderValidationList(scene) : `
         <ul class="fact-list">
@@ -1312,7 +1296,7 @@
         <div class="control-stack">
           <input class="hidden-input" id="upload-input" type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png" />
           <button class="control-btn" data-action="upload-open" ${state.upload.loading ? "disabled" : ""}>${state.upload.loading ? "识别中..." : scene ? "重新上传题图" : "上传题图"}</button>
-          ${scene ? renderUploadAdjustables(scene) : `<div class="hint">选择图片后会自动开始识别，不需要额外点击解析按钮。</div>`}
+          ${scene ? renderUploadAdjustables(scene) : ``}
         </div>
       `
     };
@@ -1410,3 +1394,4 @@
 
   renderApp();
 })();
+

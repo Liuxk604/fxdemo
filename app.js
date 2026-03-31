@@ -197,13 +197,13 @@ function renderTabs() {
     { id: "q1", index: "01", title: "题目1", desc: "串并联判断" },
     { id: "q2", index: "02", title: "题目2", desc: "多表联动" },
     { id: "q3", index: "03", title: "题目3", desc: "滑变实验" },
-    { id: "upload", index: "UP", title: "上传题目", desc: "自动复刻" }
+    { id: "upload", index: "UP", title: "上传题目", desc: "1:1复刻" }
   ];
   return `
     <div class="tabs">
-      <div class="tabs__label">实验导航</div>
+      <div class="tabs__label">Experiments</div>
       ${items.map((item) => `
-        <button class="tab ${state.selectedCase === item.id ? "active" : ""}" data-case="${item.id}">
+        <button class="tab ${item.id === "upload" ? "tab--upload" : ""} ${state.selectedCase === item.id ? "active" : ""}" data-case="${item.id}">
           <span class="tab__index">${item.index}</span>
           <span class="tab__content">
             <strong>${item.title}</strong>
@@ -233,7 +233,7 @@ function meterVertical(x, cy, r, label, topY, bottomY, active = false) {
       <line x1="${x}" y1="${topY}" x2="${x}" y2="${cy - r}" class="component-line"></line>
       <line x1="${x}" y1="${cy + r}" x2="${x}" y2="${bottomY}" class="component-line"></line>
       <circle cx="${x}" cy="${cy}" r="${r}" class="lamp-shell"></circle>
-      <circle cx="${x}" cy="${cy}" r="${r + 10}" fill="rgba(30,163,110,${active ? 0.12 : 0})" class="component-glow"></circle>
+      <circle cx="${x}" cy="${cy}" r="${r + 10}" fill="rgba(255,216,94,${active ? 0.26 : 0})" class="component-glow"></circle>
       <text x="${x}" y="${cy + 8}" text-anchor="middle" class="label">${label}</text>
     </g>
   `;
@@ -245,7 +245,7 @@ function meterHorizontal(cx, y, r, label, leftX, rightX, active = false) {
       <line x1="${leftX}" y1="${y}" x2="${cx - r}" y2="${y}" class="component-line"></line>
       <line x1="${cx + r}" y1="${y}" x2="${rightX}" y2="${y}" class="component-line"></line>
       <circle cx="${cx}" cy="${y}" r="${r}" class="lamp-shell"></circle>
-      <circle cx="${cx}" cy="${y}" r="${r + 10}" fill="rgba(30,163,110,${active ? 0.12 : 0})" class="component-glow"></circle>
+      <circle cx="${cx}" cy="${y}" r="${r + 10}" fill="rgba(255,216,94,${active ? 0.26 : 0})" class="component-glow"></circle>
       <text x="${cx}" y="${y + 8}" text-anchor="middle" class="label">${label}</text>
     </g>
   `;
@@ -310,11 +310,12 @@ function q1SwitchSymbol() {
   const g = q1.geometry;
   const x2 = state.q1.switchClosed ? g.switchContactX - 5 : g.switchOpenTipX;
   const y2 = state.q1.switchClosed ? g.bottomY : g.switchOpenTipY;
+  const lineClass = state.q1.switchClosed ? "component-line component-line--live" : "component-line";
   return `
     <g class="switch-hit" data-action="toggle-q1-switch">
       <circle cx="${g.switchPivotX}" cy="${g.bottomY}" r="5.8" class="node ${state.q1.switchClosed ? "live" : ""}"></circle>
       <circle cx="${g.switchContactX}" cy="${g.bottomY}" r="5.8" class="node ${state.q1.switchClosed ? "live" : ""}"></circle>
-      <line x1="${g.switchPivotX + 5}" y1="${g.bottomY}" x2="${x2}" y2="${y2}" class="component-line"></line>
+      <line x1="${g.switchPivotX + 5}" y1="${g.bottomY}" x2="${x2}" y2="${y2}" class="${lineClass}"></line>
       <text x="${(g.switchPivotX + g.switchContactX) / 2}" y="${g.bottomY - 42}" text-anchor="middle" class="label">S</text>
       <rect x="${g.switchPivotX - 20}" y="${g.bottomY - 56}" width="106" height="84" rx="18" fill="transparent"></rect>
     </g>
@@ -323,10 +324,11 @@ function q1SwitchSymbol() {
 
 function q1BatterySymbol() {
   const g = q1.geometry;
+  const lineClass = state.q1.switchClosed ? "component-line component-line--live" : "component-line";
   return `
     <g>
-      <line x1="${g.batteryShortX}" y1="${g.batteryShortTop}" x2="${g.batteryShortX}" y2="${g.batteryShortBottom}" class="component-line"></line>
-      <line x1="${g.batteryLongX}" y1="${g.batteryLongTop}" x2="${g.batteryLongX}" y2="${g.batteryLongBottom}" class="component-line"></line>
+      <line x1="${g.batteryShortX}" y1="${g.batteryShortTop}" x2="${g.batteryShortX}" y2="${g.batteryShortBottom}" class="${lineClass}"></line>
+      <line x1="${g.batteryLongX}" y1="${g.batteryLongTop}" x2="${g.batteryLongX}" y2="${g.batteryLongBottom}" class="${lineClass}"></line>
     </g>
   `;
 }
@@ -369,11 +371,12 @@ function q2SwitchSymbol() {
   const g = q2.geometry;
   const x2 = state.q2.switchClosed ? g.sourceX : g.switchOpenTipX;
   const y2 = state.q2.switchClosed ? g.switchTopY + 2 : g.switchOpenTipY;
+  const lineClass = state.q2.switchClosed ? "component-line component-line--live" : "component-line";
   return `
     <g class="switch-hit" data-action="toggle-q2-switch">
       <circle cx="${g.sourceX}" cy="${g.topY}" r="5.5" class="node ${state.q2.switchClosed ? "live" : ""}"></circle>
       <circle cx="${g.sourceX}" cy="${g.switchTopY}" r="5.5" class="node ${state.q2.switchClosed ? "live" : ""}"></circle>
-      <line x1="${g.sourceX - 2}" y1="${g.topY + 6}" x2="${x2}" y2="${y2}" class="component-line"></line>
+      <line x1="${g.sourceX - 2}" y1="${g.topY + 6}" x2="${x2}" y2="${y2}" class="${lineClass}"></line>
       <text x="${g.sourceX - 34}" y="${g.topY + 14}" class="label">S</text>
       <rect x="${g.sourceX - 42}" y="${g.topY - 18}" width="78" height="82" rx="18" fill="transparent"></rect>
     </g>
@@ -382,12 +385,13 @@ function q2SwitchSymbol() {
 
 function q2BatterySymbol() {
   const g = q2.geometry;
+  const lineClass = state.q2.switchClosed ? "component-line component-line--live" : "component-line";
   return `
     <g>
-      <line x1="${g.sourceX}" y1="${g.switchTopY}" x2="${g.sourceX}" y2="${g.batteryShortY - 12}" class="component-line"></line>
-      <line x1="${g.batteryShortLeft}" y1="${g.batteryShortY}" x2="${g.batteryShortRight}" y2="${g.batteryShortY}" class="component-line"></line>
-      <line x1="${g.batteryLongLeft}" y1="${g.batteryLongY}" x2="${g.batteryLongRight}" y2="${g.batteryLongY}" class="component-line"></line>
-      <line x1="${g.sourceX}" y1="${g.batteryLongY + 12}" x2="${g.sourceX}" y2="${g.bottomY}" class="component-line"></line>
+      <line x1="${g.sourceX}" y1="${g.switchTopY}" x2="${g.sourceX}" y2="${g.batteryShortY - 12}" class="${lineClass}"></line>
+      <line x1="${g.batteryShortLeft}" y1="${g.batteryShortY}" x2="${g.batteryShortRight}" y2="${g.batteryShortY}" class="${lineClass}"></line>
+      <line x1="${g.batteryLongLeft}" y1="${g.batteryLongY}" x2="${g.batteryLongRight}" y2="${g.batteryLongY}" class="${lineClass}"></line>
+      <line x1="${g.sourceX}" y1="${g.batteryLongY + 12}" x2="${g.sourceX}" y2="${g.bottomY}" class="${lineClass}"></line>
       <text x="${g.sourceX - 40}" y="${g.batteryLongY + 48}" class="sub-label">E, r</text>
     </g>
   `;
@@ -396,11 +400,12 @@ function q2BatterySymbol() {
 function q2SliderSymbol() {
   const g = q2.geometry;
   const y = g.sliderBottomY - (state.q2.slider / 100) * (g.sliderBottomY - g.sliderTopY);
+  const lineClass = state.q2.switchClosed ? "component-line component-line--live" : "component-line";
   return `
     <g class="slider-hit" data-action="q2-slider-handle">
-      <line x1="${g.sliderRightX}" y1="${y}" x2="${g.sliderLeftX}" y2="${y}" class="component-line"></line>
-      <polygon points="${g.sliderLeftX},${y} ${g.sliderLeftX + 10},${y - 6} ${g.sliderLeftX + 10},${y + 6}" fill="#1f2e2b"></polygon>
-      <circle cx="${g.sliderRightX}" cy="${y}" r="8.5" fill="#1ea36e" stroke="#ffffff" stroke-width="3"></circle>
+      <line x1="${g.sliderRightX}" y1="${y}" x2="${g.sliderLeftX}" y2="${y}" class="${lineClass}"></line>
+      <polygon points="${g.sliderLeftX},${y} ${g.sliderLeftX + 10},${y - 6} ${g.sliderLeftX + 10},${y + 6}" fill="${state.q2.switchClosed ? "#d18d00" : "#1f2e2b"}"></polygon>
+      <circle cx="${g.sliderRightX}" cy="${y}" r="8.5" fill="${state.q2.switchClosed ? "#ffd86f" : "#1ea36e"}" stroke="#ffffff" stroke-width="3"></circle>
       <rect x="${g.sliderLeftX - 10}" y="${g.sliderTopY - 18}" width="${g.sliderRightX - g.sliderLeftX + 28}" height="${g.sliderBottomY - g.sliderTopY + 36}" rx="16" fill="transparent"></rect>
     </g>
   `;
@@ -433,7 +438,7 @@ function renderQ1() {
     ],
     accentIndex: 2,
     svg: `
-      <svg viewBox="${q1.viewBox}" aria-label="题目1电路图">
+      <svg viewBox="${q1.viewBox}" aria-label="题目1电路图" class="${state.q1.switchClosed ? "circuit-live" : ""}">
         <defs>
           <clipPath id="clip-q1"><rect x="0" y="0" width="900" height="520" rx="0"></rect></clipPath>
         </defs>
@@ -475,13 +480,14 @@ function renderQ1() {
 function renderQ2() {
   const g = q2.geometry;
   const s = q2State();
+  const lineClass = state.q2.switchClosed ? "component-line component-line--live" : "component-line";
   return {
     title: "题目2：多电表联动分析",
     desc: "观察滑动变阻器位置变化后，电流表与电压表的联动趋势。",
     badges: [`开关：${s.switchText}`, s.sliderText, `结构：V2 / S / E,r / V3 / R3 / A3 / R1 / A2 / R2 / V1`],
     accentIndex: 2,
     svg: `
-      <svg viewBox="${q2.viewBox}" aria-label="题目2电路图">
+      <svg viewBox="${q2.viewBox}" aria-label="题目2电路图" class="${state.q2.switchClosed ? "circuit-live" : ""}">
         <defs>
           <clipPath id="clip-q2"><rect x="0" y="0" width="980" height="620" rx="0"></rect></clipPath>
         </defs>
@@ -492,19 +498,19 @@ function renderQ2() {
         ${q2BatterySymbol()}
         ${meterVertical(g.v3X, g.v3Cy, g.meterR, 'V3', g.topY, g.centerY, state.q2.switchClosed)}
 
-        <line x1="${g.centerX}" y1="${g.topY}" x2="${g.centerX}" y2="${g.r3Top}" class="component-line"></line>
+        <line x1="${g.centerX}" y1="${g.topY}" x2="${g.centerX}" y2="${g.r3Top}" class="${lineClass}"></line>
         ${resistorVertical(g.centerX, g.r3Top, g.r3Bottom, g.resistorW, 'R3', 24, -18, state.q2.switchClosed)}
-        <line x1="${g.centerX}" y1="${g.r3Bottom}" x2="${g.centerX}" y2="${g.a3Cy - g.meterR}" class="component-line"></line>
+        <line x1="${g.centerX}" y1="${g.r3Bottom}" x2="${g.centerX}" y2="${g.a3Cy - g.meterR}" class="${lineClass}"></line>
         ${meterVertical(g.centerX, g.a3Cy, g.meterR, 'A3', g.a3Cy - g.meterR, g.centerY, state.q2.switchClosed)}
         ${q2SliderSymbol()}
 
-        <line x1="${g.centerX}" y1="${g.centerY}" x2="${g.centerX}" y2="${g.r1Top}" class="component-line"></line>
+        <line x1="${g.centerX}" y1="${g.centerY}" x2="${g.centerX}" y2="${g.r1Top}" class="${lineClass}"></line>
         ${resistorVertical(g.centerX, g.r1Top, g.r1Bottom, g.resistorW, 'R1', 34, 4, state.q2.switchClosed)}
-        <line x1="${g.centerX}" y1="${g.r1Bottom}" x2="${g.centerX}" y2="${g.bottomY}" class="component-line"></line>
+        <line x1="${g.centerX}" y1="${g.r1Bottom}" x2="${g.centerX}" y2="${g.bottomY}" class="${lineClass}"></line>
 
-        <line x1="${g.rightX}" y1="${g.topY}" x2="${g.rightX}" y2="${g.r2Top}" class="component-line"></line>
+        <line x1="${g.rightX}" y1="${g.topY}" x2="${g.rightX}" y2="${g.r2Top}" class="${lineClass}"></line>
         ${resistorVertical(g.rightX, g.r2Top, g.r2Bottom, g.resistorW, 'R2', 30, 8, state.q2.switchClosed)}
-        <line x1="${g.rightX}" y1="${g.r2Bottom}" x2="${g.rightX}" y2="${g.centerY}" class="component-line"></line>
+        <line x1="${g.rightX}" y1="${g.r2Bottom}" x2="${g.rightX}" y2="${g.centerY}" class="${lineClass}"></line>
         ${meterVertical(g.rightX, g.v1Cy, g.meterR, 'V1', g.centerY, g.bottomY, state.q2.switchClosed)}
 
         ${meterHorizontal(g.a1Cx, g.bottomY, g.meterR, 'A1', g.sourceX, g.centerX, state.q2.switchClosed)}
@@ -578,10 +584,11 @@ function q3Particles() {
 
 function q3BatterySymbol() {
   const g = q3.geometry;
+  const lineClass = state.q3.switchClosed ? "component-line component-line--live" : "component-line";
   return `
     <g>
-      <line x1="${g.batteryShortX}" y1="${g.batteryShortTop}" x2="${g.batteryShortX}" y2="${g.batteryShortBottom}" class="component-line"></line>
-      <line x1="${g.batteryLongX}" y1="${g.batteryLongTop}" x2="${g.batteryLongX}" y2="${g.batteryLongBottom}" class="component-line"></line>
+      <line x1="${g.batteryShortX}" y1="${g.batteryShortTop}" x2="${g.batteryShortX}" y2="${g.batteryShortBottom}" class="${lineClass}"></line>
+      <line x1="${g.batteryLongX}" y1="${g.batteryLongTop}" x2="${g.batteryLongX}" y2="${g.batteryLongBottom}" class="${lineClass}"></line>
     </g>
   `;
 }
@@ -590,11 +597,12 @@ function q3SwitchSymbol() {
   const g = q3.geometry;
   const x2 = state.q3.switchClosed ? g.switchContactX - 4 : g.switchOpenTipX;
   const y2 = state.q3.switchClosed ? g.bottomY : g.switchOpenTipY;
+  const lineClass = state.q3.switchClosed ? "component-line component-line--live" : "component-line";
   return `
     <g class="switch-hit" data-action="toggle-q3-switch">
       <circle cx="${g.switchPivotX}" cy="${g.bottomY}" r="5.6" class="node ${state.q3.switchClosed ? "live" : ""}"></circle>
       <circle cx="${g.switchContactX}" cy="${g.bottomY}" r="5.6" class="node ${state.q3.switchClosed ? "live" : ""}"></circle>
-      <line x1="${g.switchPivotX + 5}" y1="${g.bottomY}" x2="${x2}" y2="${y2}" class="component-line"></line>
+      <line x1="${g.switchPivotX + 5}" y1="${g.bottomY}" x2="${x2}" y2="${y2}" class="${lineClass}"></line>
       <text x="${(g.switchPivotX + g.switchContactX) / 2}" y="${g.bottomY - 40}" text-anchor="middle" class="label">S</text>
       <rect x="${g.switchPivotX - 18}" y="${g.bottomY - 56}" width="102" height="82" rx="18" fill="transparent"></rect>
     </g>
@@ -604,12 +612,13 @@ function q3SwitchSymbol() {
 function q3SliderSymbol() {
   const g = q3.geometry;
   const x = g.sliderMinX + (state.q3.slider / 100) * (g.sliderMaxX - g.sliderMinX);
+  const lineClass = state.q3.switchClosed ? "component-line component-line--live" : "component-line";
   return `
     <g class="slider-hit" data-action="q3-slider-handle">
-      <path d="M${g.sliderLoopRightX} ${g.topY} L${g.sliderLoopRightX} ${g.sliderLoopTopY} L${x} ${g.sliderLoopTopY} L${x} ${g.sliderTopY}" class="component-line"></path>
-      <line x1="${x}" y1="${g.sliderTopY}" x2="${x}" y2="${g.sliderBottomY}" class="component-line"></line>
-      <polygon points="${x},${g.sliderBottomY} ${x - 7},${g.sliderBottomY - 10} ${x + 7},${g.sliderBottomY - 10}" fill="#1f2e2b"></polygon>
-      <circle cx="${x}" cy="${g.sliderLoopTopY}" r="8.5" fill="#1ea36e" stroke="#ffffff" stroke-width="3"></circle>
+      <path d="M${g.sliderLoopRightX} ${g.topY} L${g.sliderLoopRightX} ${g.sliderLoopTopY} L${x} ${g.sliderLoopTopY} L${x} ${g.sliderTopY}" class="${lineClass}"></path>
+      <line x1="${x}" y1="${g.sliderTopY}" x2="${x}" y2="${g.sliderBottomY}" class="${lineClass}"></line>
+      <polygon points="${x},${g.sliderBottomY} ${x - 7},${g.sliderBottomY - 10} ${x + 7},${g.sliderBottomY - 10}" fill="${state.q3.switchClosed ? "#d18d00" : "#1f2e2b"}"></polygon>
+      <circle cx="${x}" cy="${g.sliderLoopTopY}" r="8.5" fill="${state.q3.switchClosed ? "#ffd86f" : "#1ea36e"}" stroke="#ffffff" stroke-width="3"></circle>
       <rect x="${g.sliderMinX - 18}" y="${g.sliderLoopTopY - 20}" width="${g.sliderLoopRightX - g.sliderMinX + 36}" height="${g.sliderBottomY - g.sliderLoopTopY + 40}" rx="16" fill="transparent"></rect>
       <text x="${x}" y="${g.sliderLoopTopY - 16}" text-anchor="middle" class="label">P</text>
     </g>
@@ -633,13 +642,14 @@ function q3NodeDots() {
 function renderQ3() {
   const g = q3.geometry;
   const s = q3Solve();
+  const lineClass = state.q3.switchClosed ? "component-line component-line--live" : "component-line";
   return {
     title: "题目3：滑动变阻器与电压表",
     desc: "通过改变 R2 接入电阻，观察电压表对 R1 两端电压的测量变化。",
     badges: [`开关：${s.switchText}`, `R2 ≈ ${format(s.r2Value)}Ω`, `电压表 ≈ ${format(s.voltageV)}V`],
     accentIndex: 2,
     svg: `
-      <svg viewBox="${q3.viewBox}" aria-label="题目3电路图">
+      <svg viewBox="${q3.viewBox}" aria-label="题目3电路图" class="${state.q3.switchClosed ? "circuit-live" : ""}">
         <defs>
           <clipPath id="clip-q3"><rect x="0" y="0" width="920" height="520" rx="0"></rect></clipPath>
         </defs>
@@ -651,6 +661,8 @@ function renderQ3() {
         ${q3BatterySymbol()}
         ${q3SwitchSymbol()}
         ${q3SliderSymbol()}
+        ${state.q3.switchClosed ? `<line x1="${g.r1X + g.r1W}" y1="${g.topY}" x2="${g.centerX}" y2="${g.topY}" class="${lineClass}"></line>` : ""}
+        ${state.q3.switchClosed ? `<line x1="${g.centerX}" y1="${g.topY}" x2="${g.r2X}" y2="${g.topY}" class="${lineClass}"></line>` : ""}
         ${q3NodeDots()}
       </svg>
     `,
@@ -810,11 +822,7 @@ function renderApp() {
     state.selectedCase === "q2" ? renderQ2() :
     state.selectedCase === "q3" ? renderQ3() :
     renderUploadPage();
-  const footerTitle = current.footerTitle || "说明";
   const parametersTitle = current.parametersTitle || "关键参数";
-  const lawsTitle = current.lawsTitle || "规律提示";
-  const modeLabel = state.selectedCase === "upload" ? "AI 识图工作流" : "教材实验工作流";
-  const supportLabel = state.selectedCase === "upload" ? "图像解析 / 结构修复 / 交互复刻" : "开关控制 / 参数拖拽 / 结果观察";
   app.innerHTML = `
     <section class="stage">
       <div class="dashboard-shell">
@@ -822,89 +830,56 @@ function renderApp() {
           <div class="sidebar-brand">
             <div class="sidebar-brand__mark">CL</div>
             <div class="sidebar-brand__text">
-              <strong>飞象 Circuit Lab</strong>
+              <strong>飞象Lab</strong>
               <span>Interactive Physics Studio</span>
             </div>
           </div>
           ${renderTabs()}
-          <div class="sidebar-stack">
-            ${renderPreviewCard()}
-            <div class="sidebar-note">
-              <div class="sidebar-note__eyebrow">当前模式</div>
-              <strong>${modeLabel}</strong>
-              <p>${supportLabel}</p>
-            </div>
-          </div>
         </aside>
         <div class="dashboard-main">
           <div class="product-topbar">
             <div class="brand-block">
               <div class="brand-block__tag">飞象老师 · Circuit Lab</div>
-              <h1>构建你的电路实验工作台</h1>
-              <p>围绕题图复刻、参数调节与实验观察设计的高还原度电路实验界面。</p>
-            </div>
-            <div class="meta">
-              ${current.badges.map((badge, idx) => `<span class="badge ${idx === current.accentIndex ? "accent" : ""}">${badge}</span>`).join("")}
+              <h1>电路实验工作台</h1>
+              <p>用户上传电路图物理题，生成可以调参的模拟电路实验 </p>
             </div>
           </div>
           <div class="workspace">
             <div class="workspace-main">
-              <div class="hero-panel">
-                <div class="hero-panel__copy">
-                  <div class="hero-panel__eyebrow">实验主题</div>
-                  <h2>${current.title}</h2>
-                  <p>${current.desc}</p>
-                </div>
-                <div class="hero-panel__meta">
-                  <div class="hero-stat">
-                    <span>模式</span>
-                    <strong>${state.selectedCase === "upload" ? "自动生成" : "手动精修"}</strong>
-                  </div>
-                  <div class="hero-stat">
-                    <span>重点</span>
-                    <strong>${state.selectedCase === "upload" ? "高还原复刻" : "高交互演示"}</strong>
+              <div class="focus-panel">
+                <div class="focus-panel__head">
+                  <div class="focus-panel__copy">
+                    <h2>${current.title}</h2>
+                    <p>${current.desc}</p>
                   </div>
                 </div>
-              </div>
-              <div class="canvas">
-                <div class="canvas__topbar">
-                  <div class="canvas__title">
-                    <strong>实验画布</strong>
-                    <span>保留电路图原始实现，优化展示体验与信息层次</span>
+                <div class="canvas">
+                  <div class="canvas__topbar">
+                    <div class="canvas__title">
+                      <strong>实验画布</strong>
+                      <span>保留电路图实现，仅重构页面布局与视觉层次。</span>
+                    </div>
+                    <div class="canvas__signals">
+                      <span></span>
+                      <span></span>
+                      <span></span>
+                    </div>
                   </div>
-                  <div class="canvas__signals">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                  </div>
+                  <div class="svg-wrap">${current.svg}</div>
                 </div>
-                <div class="svg-wrap">${current.svg}</div>
               </div>
             </div>
             <aside class="workspace-right">
+              ${renderPreviewCard()}
               <div class="panel-card panel-card--feature">
                 <div class="panel-card__label">交互控制</div>
                 ${current.controls}
               </div>
-              <div class="panel-card panel-card--summary">
-                <div class="panel-card__label">实验摘要</div>
-                <p>${current.footerDesc}</p>
+              <div class="panel-card panel-card--params">
+                <div class="panel-card__label">${parametersTitle}</div>
+                ${current.parameters}
               </div>
             </aside>
-          </div>
-          <div class="bottom-panels bottom-panels--full">
-            <div class="panel-card">
-              <div class="panel-card__label">${footerTitle}</div>
-              <p>${current.footerDesc}</p>
-            </div>
-            <div class="panel-card">
-              <div class="panel-card__label">${parametersTitle}</div>
-              ${current.parameters}
-            </div>
-            <div class="panel-card">
-              <div class="panel-card__label">${lawsTitle}</div>
-              ${current.laws}
-            </div>
           </div>
         </div>
       </div>
