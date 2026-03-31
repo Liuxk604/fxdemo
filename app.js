@@ -193,12 +193,24 @@ function q3Solve() {
 }
 
 function renderTabs() {
+  const items = [
+    { id: "q1", index: "01", title: "题目1", desc: "串并联判断" },
+    { id: "q2", index: "02", title: "题目2", desc: "多表联动" },
+    { id: "q3", index: "03", title: "题目3", desc: "滑变实验" },
+    { id: "upload", index: "UP", title: "上传题目", desc: "自动复刻" }
+  ];
   return `
     <div class="tabs">
-      <button class="tab ${state.selectedCase === "q1" ? "active" : ""}" data-case="q1">题目1</button>
-      <button class="tab ${state.selectedCase === "q2" ? "active" : ""}" data-case="q2">题目2</button>
-      <button class="tab ${state.selectedCase === "q3" ? "active" : ""}" data-case="q3">题目3</button>
-      <button class="tab ${state.selectedCase === "upload" ? "active" : ""}" data-case="upload">上传题目</button>
+      <div class="tabs__label">实验导航</div>
+      ${items.map((item) => `
+        <button class="tab ${state.selectedCase === item.id ? "active" : ""}" data-case="${item.id}">
+          <span class="tab__index">${item.index}</span>
+          <span class="tab__content">
+            <strong>${item.title}</strong>
+            <span>${item.desc}</span>
+          </span>
+        </button>
+      `).join("")}
     </div>
   `;
 }
@@ -801,41 +813,86 @@ function renderApp() {
   const footerTitle = current.footerTitle || "说明";
   const parametersTitle = current.parametersTitle || "关键参数";
   const lawsTitle = current.lawsTitle || "规律提示";
+  const modeLabel = state.selectedCase === "upload" ? "AI 识图工作流" : "教材实验工作流";
+  const supportLabel = state.selectedCase === "upload" ? "图像解析 / 结构修复 / 交互复刻" : "开关控制 / 参数拖拽 / 结果观察";
   app.innerHTML = `
     <section class="stage">
-      ${renderTabs()}
-      <div class="product-topbar">
-        <div class="brand-block">
-          <div class="brand-block__tag">飞象老师 · Circuit Lab</div>
-          <h1>电路题交互实验</h1>
-          <p>面向中学物理场景的高还原度电路图复刻与交互实验页面。</p>
-        </div>
-        <div class="meta">
-          ${current.badges.map((badge, idx) => `<span class="badge ${idx === current.accentIndex ? "accent" : ""}">${badge}</span>`).join("")}
-        </div>
-      </div>
-      <div class="workspace">
-        <aside class="workspace-left">
-          ${renderPreviewCard()}
-          <div class="panel-card">
-            <div class="panel-card__label">题目主题</div>
-            <h2>${current.title}</h2>
-            <p>${current.desc}</p>
+      <div class="dashboard-shell">
+        <aside class="sidebar">
+          <div class="sidebar-brand">
+            <div class="sidebar-brand__mark">CL</div>
+            <div class="sidebar-brand__text">
+              <strong>飞象 Circuit Lab</strong>
+              <span>Interactive Physics Studio</span>
+            </div>
+          </div>
+          ${renderTabs()}
+          <div class="sidebar-stack">
+            ${renderPreviewCard()}
+            <div class="sidebar-note">
+              <div class="sidebar-note__eyebrow">当前模式</div>
+              <strong>${modeLabel}</strong>
+              <p>${supportLabel}</p>
+            </div>
           </div>
         </aside>
-        <div class="workspace-main">
-          <div class="canvas">
-            <div class="svg-wrap">${current.svg}</div>
+        <div class="dashboard-main">
+          <div class="product-topbar">
+            <div class="brand-block">
+              <div class="brand-block__tag">飞象老师 · Circuit Lab</div>
+              <h1>构建你的电路实验工作台</h1>
+              <p>围绕题图复刻、参数调节与实验观察设计的高还原度电路实验界面。</p>
+            </div>
+            <div class="meta">
+              ${current.badges.map((badge, idx) => `<span class="badge ${idx === current.accentIndex ? "accent" : ""}">${badge}</span>`).join("")}
+            </div>
           </div>
-        </div>
-        <aside class="workspace-right">
-          <div class="panel-card">
-            <div class="panel-card__label">交互控制</div>
-            ${current.controls}
+          <div class="workspace">
+            <div class="workspace-main">
+              <div class="hero-panel">
+                <div class="hero-panel__copy">
+                  <div class="hero-panel__eyebrow">实验主题</div>
+                  <h2>${current.title}</h2>
+                  <p>${current.desc}</p>
+                </div>
+                <div class="hero-panel__meta">
+                  <div class="hero-stat">
+                    <span>模式</span>
+                    <strong>${state.selectedCase === "upload" ? "自动生成" : "手动精修"}</strong>
+                  </div>
+                  <div class="hero-stat">
+                    <span>重点</span>
+                    <strong>${state.selectedCase === "upload" ? "高还原复刻" : "高交互演示"}</strong>
+                  </div>
+                </div>
+              </div>
+              <div class="canvas">
+                <div class="canvas__topbar">
+                  <div class="canvas__title">
+                    <strong>实验画布</strong>
+                    <span>保留电路图原始实现，优化展示体验与信息层次</span>
+                  </div>
+                  <div class="canvas__signals">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                </div>
+                <div class="svg-wrap">${current.svg}</div>
+              </div>
+            </div>
+            <aside class="workspace-right">
+              <div class="panel-card panel-card--feature">
+                <div class="panel-card__label">交互控制</div>
+                ${current.controls}
+              </div>
+              <div class="panel-card panel-card--summary">
+                <div class="panel-card__label">实验摘要</div>
+                <p>${current.footerDesc}</p>
+              </div>
+            </aside>
           </div>
-        </aside>
-      </div>
-      <div class="bottom-panels bottom-panels--full">
+          <div class="bottom-panels bottom-panels--full">
             <div class="panel-card">
               <div class="panel-card__label">${footerTitle}</div>
               <p>${current.footerDesc}</p>
@@ -848,6 +905,8 @@ function renderApp() {
               <div class="panel-card__label">${lawsTitle}</div>
               ${current.laws}
             </div>
+          </div>
+        </div>
       </div>
     </section>
   `;
