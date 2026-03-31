@@ -116,7 +116,7 @@ const q3 = {
 const state = {
   selectedCase: "q1",
   q1: { switchClosed: false },
-  q2: { switchClosed: false, slider: 62 },
+  q2: { switchClosed: false, slider: 62, previousSlider: 62 },
   q3: { switchClosed: false, slider: 25 }
 };
 
@@ -159,15 +159,57 @@ function q1Solve() {
   };
 }
 
+function q2SliderPositionLabel() {
+  if (state.q2.slider >= 67) return "偏上";
+  if (state.q2.slider <= 33) return "偏下";
+  return "居中";
+}
+
 function q2State() {
-  const position = state.q2.slider >= 67 ? "上" : state.q2.slider <= 33 ? "下" : "中";
   return {
     switchText: state.q2.switchClosed ? "闭合" : "断开",
-    sliderText: `R3 滑片偏${position}`,
+    sliderText: `R3 滑片${q2SliderPositionLabel()}`,
     conclusion: state.q2.switchClosed
       ? "已闭合开关 S，可继续调节 R3 滑片位置观察电路结构。"
       : "开关断开时，电路保持结构展示状态。"
   };
+}
+
+function q2TrendLabel(delta, polarity = 1) {
+  if (delta === 0) return "不变";
+  return delta * polarity > 0 ? "增大" : "减小";
+}
+
+function q2MeterTrends() {
+  const delta = state.q2.slider - state.q2.previousSlider;
+  return {
+    A1: q2TrendLabel(delta, -1),
+    A2: q2TrendLabel(delta, 1),
+    A3: q2TrendLabel(delta, -1),
+    V1: q2TrendLabel(delta, -1),
+    V2: q2TrendLabel(delta, 1),
+    V3: q2TrendLabel(delta, 1)
+  };
+}
+
+function trendTone(value) {
+  if (value === "增大") return "up";
+  if (value === "减小") return "down";
+  return "steady";
+}
+
+function trendMetric(label, value) {
+  return `
+    <div class="kv-item kv-item--compact">
+      <span>${label}</span>
+      <strong class="trend trend--${trendTone(value)}">${value}</strong>
+    </div>
+  `;
+}
+
+function setQ2Slider(nextValue) {
+  state.q2.previousSlider = state.q2.slider;
+  state.q2.slider = clamp(Math.round(nextValue), 0, 100);
 }
 
 function q3Solve() {
@@ -465,6 +507,9 @@ function renderQ1() {
         <div class="kv-item"><span>电源电压</span><strong>${format(q1.batteryVoltage)}V</strong></div>
         <div class="kv-item"><span>单灯阻值</span><strong>6Ω</strong></div>
         <div class="kv-item"><span>总电流</span><strong>${format(result.totalCurrent)}A</strong></div>
+        <div class="kv-item"><span>L1 状态</span><strong>${result.lamps.L1 ? "亮" : "灭"}</strong></div>
+        <div class="kv-item"><span>L2 状态</span><strong>${result.lamps.L2 ? "亮" : "灭"}</strong></div>
+        <div class="kv-item"><span>L3 状态</span><strong>${result.lamps.L3 ? "亮" : "灭"}</strong></div>
       </div>
     `,
     laws: `
@@ -480,6 +525,8 @@ function renderQ1() {
 function renderQ2() {
   const g = q2.geometry;
   const s = q2State();
+  const trends = q2MeterTrends();
+  const sliderSummary = `${format(state.q2.slider, 0)}% · ${q2SliderPositionLabel()}`;
   const lineClass = state.q2.switchClosed ? "component-line component-line--live" : "component-line";
   return {
     title: "题目2：多电表联动分析",
@@ -536,10 +583,19 @@ function renderQ2() {
       </div>
     `,
     parameters: `
-      <div class="kv-list">
-        <div class="kv-item"><span>R3滑片</span><strong>${format(state.q2.slider, 0)}%</strong></div>
-        <div class="kv-item"><span>开关状态</span><strong>${s.switchText}</strong></div>
-        <div class="kv-item"><span>联动重点</span><strong>电流 / 电压</strong></div>
+      <div class="kv-list kv-list--tight">
+        <div class="kv-item">
+          <span>R3滑片</span>
+          <strong>${sliderSummary}</strong>
+        </div>
+      </div>
+      <div class="kv-list kv-list--meter-grid">
+        ${trendMetric("A1", trends.A1)}
+        ${trendMetric("A2", trends.A2)}
+        ${trendMetric("A3", trends.A3)}
+        ${trendMetric("V1", trends.V1)}
+        ${trendMetric("V2", trends.V2)}
+        ${trendMetric("V3", trends.V3)}
       </div>
     `,
     laws: `
@@ -688,6 +744,7 @@ function renderQ3() {
         <div class="kv-item"><span>R1阻值</span><strong>${q3.r1}Ω</strong></div>
         <div class="kv-item"><span>R2阻值</span><strong>${format(s.r2Value)}Ω</strong></div>
         <div class="kv-item"><span>电流</span><strong>${format(s.current)}A</strong></div>
+        <div class="kv-item"><span>V表读数</span><strong>${format(s.voltageV)}V</strong></div>
       </div>
     `,
     laws: `
@@ -771,7 +828,7 @@ function updateQ2SliderFromPointer(clientY) {
   if (y == null) return;
   const g = q2.geometry;
   const ratio = (g.sliderBottomY - y) / (g.sliderBottomY - g.sliderTopY);
-  state.q2.slider = clamp(Math.round(ratio * 100), 0, 100);
+  setQ2Slider(ratio * 100);
   renderApp();
 }
 
@@ -902,9 +959,9 @@ app.addEventListener("click", (event) => {
   if (action === "toggle-q1-switch") state.q1.switchClosed = !state.q1.switchClosed;
   if (action === "toggle-q2-switch") state.q2.switchClosed = !state.q2.switchClosed;
   if (action === "toggle-q3-switch") state.q3.switchClosed = !state.q3.switchClosed;
-  if (action === "q2-slider-low") state.q2.slider = 15;
-  if (action === "q2-slider-mid") state.q2.slider = 50;
-  if (action === "q2-slider-high") state.q2.slider = 85;
+  if (action === "q2-slider-low") setQ2Slider(15);
+  if (action === "q2-slider-mid") setQ2Slider(50);
+  if (action === "q2-slider-high") setQ2Slider(85);
   if (action === "q3-slider-low") state.q3.slider = 10;
   if (action === "q3-slider-mid") state.q3.slider = 50;
   if (action === "q3-slider-high") state.q3.slider = 90;
@@ -917,7 +974,7 @@ app.addEventListener("click", (event) => {
 app.addEventListener("input", (event) => {
   const action = event.target?.dataset?.action;
   if (action === "q2-slider-range") {
-    state.q2.slider = Number(event.target.value);
+    setQ2Slider(Number(event.target.value));
     renderApp();
   }
   if (action === "q3-slider-range") {

@@ -672,6 +672,15 @@ body {
   gap: 12px;
 }
 
+.kv-list--tight {
+  gap: 10px;
+}
+
+.kv-list--meter-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
 .mini-actions {
   display: flex;
   flex-wrap: wrap;
@@ -758,6 +767,40 @@ body {
 .kv-item strong {
   color: var(--ink);
   font-size: 15px;
+}
+
+.kv-item--compact {
+  min-height: 76px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px;
+}
+
+.kv-item--compact span {
+  font-size: 12px;
+  letter-spacing: 0.03em;
+}
+
+.kv-item--compact strong {
+  font-size: 18px;
+}
+
+.trend {
+  transition: color 180ms ease, transform 180ms ease;
+}
+
+.trend--up {
+  color: #c98600;
+}
+
+.trend--down {
+  color: #5b678c;
+}
+
+.trend--steady {
+  color: var(--ink);
 }
 
 .bottom-panels {
