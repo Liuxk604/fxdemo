@@ -96,6 +96,7 @@ const server = http.createServer(async (req, res) => {
         usage: result.usage
       });
     } catch (error) {
+      console.error("[parse-circuit] failed:", error && error.stack ? error.stack : error);
       sendJson(res, 500, {
         ok: false,
         error: error.message || "Parse failed"

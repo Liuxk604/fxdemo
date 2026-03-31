@@ -295,8 +295,73 @@
     return dedupePolyline(stack);
   }
 
+  function uploadModelConfig() {
+    return {
+      label: "GPT-5.4",
+      model: "gpt-5.4",
+      parseMode: "quality",
+      repairPass: true
+    };
+  }
+
+  function polylineBendCount(points) {
+    const normalized = dedupePolyline(points);
+    let bends = 0;
+    for (let index = 1; index < normalized.length - 1; index += 1) {
+      const prev = normalized[index - 1];
+      const current = normalized[index];
+      const next = normalized[index + 1];
+      const entersHorizontal = prev.y === current.y;
+      const exitsHorizontal = current.y === next.y;
+      if (entersHorizontal !== exitsHorizontal) bends += 1;
+    }
+    return bends;
+  }
+
+  function collapseDetourToElbow(points, tolerance = 18) {
+    const normalized = simplifyOrthogonalPolyline(orthogonalizePolyline(points));
+    if (normalized.length <= 3) return normalized;
+
+    const start = normalized[0];
+    const end = normalized[normalized.length - 1];
+    if (!start || !end) return normalized;
+    if (start.x === end.x || start.y === end.y) return [start, end];
+
+    const interior = normalized.slice(1, -1);
+    const minX = Math.min(start.x, end.x) - tolerance;
+    const maxX = Math.max(start.x, end.x) + tolerance;
+    const minY = Math.min(start.y, end.y) - tolerance;
+    const maxY = Math.max(start.y, end.y) + tolerance;
+    const staysInCorridor = interior.every((point) =>
+      point.x >= minX &&
+      point.x <= maxX &&
+      point.y >= minY &&
+      point.y <= maxY
+    );
+
+    if (!staysInCorridor || polylineBendCount(normalized) < 2) {
+      return normalized;
+    }
+
+    const focus = interior[Math.floor(interior.length / 2)] || interior[0];
+    const candidates = [
+      simplifyOrthogonalPolyline([start, { x: end.x, y: start.y }, end]),
+      simplifyOrthogonalPolyline([start, { x: start.x, y: end.y }, end])
+    ];
+
+    candidates.sort((left, right) => {
+      const leftElbow = left[1] || start;
+      const rightElbow = right[1] || start;
+      const leftScore = Math.abs(leftElbow.x - focus.x) + Math.abs(leftElbow.y - focus.y);
+      const rightScore = Math.abs(rightElbow.x - focus.x) + Math.abs(rightElbow.y - focus.y);
+      return leftScore - rightScore;
+    });
+
+    return candidates[0];
+  }
+
   function normalizeWirePolyline(points) {
-    return orthogonalizePolyline(points);
+    return collapseDetourToElbow(orthogonalizePolyline(points));
   }
 
   function nearestPolylinePointIndex(points, anchor, tolerance = 18) {
@@ -349,7 +414,7 @@
     const minY = Math.min(...points.map((point) => point.y));
     const maxX = Math.max(...points.map((point) => point.x));
     const maxY = Math.max(...points.map((point) => point.y));
-    const padding = 36;
+    const padding = 18;
     return [
       Math.max(0, Math.floor(minX - padding)),
       Math.max(0, Math.floor(minY - padding)),
@@ -728,6 +793,162 @@
     } catch {
       return null;
     }
+  }
+
+  function formatSceneValue(value, unit = "", digits = 2) {
+    if (typeof value === "boolean") return value ? "是" : "否";
+    if (value == null || value === "") return "";
+    const num = Number(value);
+    if (Number.isFinite(num)) return `${format(num, digits)}${unit}`;
+    return `${value}${unit}`;
+  }
+
+  function findNumericParam(component, keys) {
+    for (const key of keys) {
+      const value = Number(component?.params?.[key]);
+      if (Number.isFinite(value)) return value;
+    }
+    return null;
+  }
+
+  function summarizedLabels(components, fallbackPrefix) {
+    const labels = components
+      .map((component, index) => String(component?.label || "").trim() || `${fallbackPrefix}${index + 1}`)
+      .filter(Boolean);
+    if (!labels.length) return "";
+    return labels.length <= 3 ? labels.join(" / ") : `${labels.slice(0, 3).join(" / ")} 等 ${labels.length} 个`;
+  }
+
+  function measurementEntries(scene) {
+    const context = buildSceneContext(scene);
+    return (scene?.simulation?.measurements || [])
+      .map((item, index) => {
+        const value = evaluateSceneExpression(item.expr, context);
+        if (value == null || Number.isNaN(value)) return null;
+        const label = String(item.label || item.id || `测量${index + 1}`).trim();
+        if (!label) return null;
+        return {
+          key: `measurement:${item.id || index}`,
+          label,
+          value: formatSceneValue(value, item.unit || "", 2)
+        };
+      })
+      .filter(Boolean);
+  }
+
+  function uploadParameterEntries(scene) {
+    const measurements = measurementEntries(scene);
+    const components = (scene?.components || []).map((component) => getResolvedSceneComponent(component));
+    const entries = [...measurements];
+
+    const switches = components.filter((component) => component.type === "switch");
+    if (switches.length) {
+      entries.push({
+        key: "switches",
+        label: "开关",
+        value: switches
+          .map((component, index) => `${String(component.label || "").trim() || `S${index + 1}`} ${component.params?.closed ? "闭合" : "断开"}`)
+          .join(" / ")
+      });
+    }
+
+    const voltmeters = components.filter((component) => component.type === "voltmeter");
+    if (voltmeters.length) {
+      entries.push({
+        key: "voltmeters",
+        label: "电压表",
+        value: summarizedLabels(voltmeters, "V") || "已识别"
+      });
+    }
+
+    const ammeters = components.filter((component) => component.type === "ammeter");
+    if (ammeters.length) {
+      entries.push({
+        key: "ammeters",
+        label: "电流表",
+        value: summarizedLabels(ammeters, "A") || "已识别"
+      });
+    }
+
+    const rheostats = components.filter((component) => component.type === "variable_resistor");
+    if (rheostats.length) {
+      entries.push({
+        key: "rheostats",
+        label: "滑动变阻器",
+        value: rheostats.map((component, index) => {
+          const ratio = Number(component.params?.slider_position ?? component.params?.slider_ratio ?? component.params?.position);
+          const label = String(component.label || "").trim() || `R${index + 1}`;
+          return Number.isFinite(ratio) ? `${label} ${format(ratio * 100, 0)}%` : `${label} 已识别`;
+        }).join(" / ")
+      });
+    }
+
+    const batteries = components.filter((component) => component.type === "battery");
+    if (batteries.length) {
+      entries.push({
+        key: "batteries",
+        label: "电源",
+        value: batteries.map((component, index) => {
+          const label = String(component.label || "").trim() || `E${index + 1}`;
+          const voltage = findNumericParam(component, ["voltage_v", "emf_v", "battery_voltage_v", "value_v", "voltage"]);
+          return Number.isFinite(voltage) ? `${label} ${format(voltage, 2)}V` : `${label} 已识别`;
+        }).join(" / ")
+      });
+    }
+
+    const fixedResistors = components.filter((component) => component.type === "resistor");
+    if (fixedResistors.length) {
+      const known = fixedResistors
+        .map((component, index) => {
+          const resistance = findNumericParam(component, ["resistance_ohm", "value_ohm", "ohm"]);
+          if (!Number.isFinite(resistance)) return null;
+          const label = String(component.label || "").trim() || `R${index + 1}`;
+          return `${label} ${format(resistance, 2)}Ω`;
+        })
+        .filter(Boolean);
+      entries.push({
+        key: "resistors",
+        label: "定值电阻",
+        value: known.length ? known.join(" / ") : summarizedLabels(fixedResistors, "R") || `${fixedResistors.length} 个`
+      });
+    }
+
+    const lamps = components.filter((component) => component.type === "lamp");
+    if (lamps.length) {
+      entries.push({
+        key: "lamps",
+        label: "灯泡",
+        value: summarizedLabels(lamps, "L") || `${lamps.length} 个`
+      });
+    }
+
+    const deduped = [];
+    const seen = new Set();
+    entries.forEach((entry) => {
+      const key = `${entry.label}:${entry.value}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+      deduped.push(entry);
+    });
+    return deduped.slice(0, 8);
+  }
+
+  function renderUploadParameters(scene) {
+    const entries = uploadParameterEntries(scene);
+    if (!entries.length) {
+      return `<div class="kv-item"><span>实验参数</span><strong>未识别到可用数据</strong></div>`;
+    }
+
+    return `
+      <div class="kv-list kv-list--meter-grid">
+        ${entries.map((entry) => `
+          <div class="kv-item kv-item--compact">
+            <span>${escapeUploadHtml(entry.label)}</span>
+            <strong>${escapeUploadHtml(entry.value)}</strong>
+          </div>
+        `).join("")}
+      </div>
+    `;
   }
 
   function getSceneHighlights(scene) {
@@ -1213,7 +1434,7 @@
     const viewBox = scene.render_view_box || computeRenderViewBox(scene);
     return `
       <div class="scene-stage scene-stage--upload">
-        <svg viewBox="${viewBox.join(" ")}" aria-label="上传题目电路图">
+        <svg viewBox="${viewBox.join(" ")}" preserveAspectRatio="xMidYMid meet" aria-label="上传题目电路图">
           ${(scene.wires || []).map((wire) => renderSceneWire(scene, wire, highlights)).join("")}
           ${(scene.junctions || []).map((junction) => {
             const kind = String(junction.kind || "");
@@ -1258,7 +1479,6 @@
   renderUploadPage = function renderUploadPageV2() {
     const scene = state.upload.scene;
     const meta = uploadMeta(scene);
-    const adjustables = scene?.simulation?.adjustables || [];
 
     return {
       title: meta.title,
@@ -1275,15 +1495,7 @@
         ? "正在调用多模态模型识别题图，请等待结果返回。"
         : (scene?.normalization?.note || "当前结果已完成上传页归一化。"),
       parametersTitle: "关键参数",
-      parameters: scene ? `
-        <div class="kv-list">
-          <div class="kv-item"><span>组件总数</span><strong>${scene.components?.length || 0}</strong></div>
-          <div class="kv-item"><span>导线总数</span><strong>${scene.wires?.length || 0}</strong></div>
-          <div class="kv-item"><span>可交互项</span><strong>${adjustables.length}</strong></div>
-          <div class="kv-item"><span>模板分类</span><strong>${escapeUploadHtml(scene.normalization?.template || "generic")}</strong></div>
-          <div class="kv-item"><span>结构摘要</span><strong>${escapeUploadHtml(uploadSummary(scene) || "暂无")}</strong></div>
-        </div>
-      ` : ``,
+      parameters: scene ? renderUploadParameters(scene) : ``,
       lawsTitle: "校验与交互",
       laws: scene ? renderValidationList(scene) : `
         <ul class="fact-list">
@@ -1314,12 +1526,19 @@
 
     try {
       const payload = await uploadFileToPayload(file);
+      const modelConfig = uploadModelConfig();
       const { response, data } = await fetchJsonWithRetry("/api/parse-circuit", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({
+          ...payload,
+          provider: "openai",
+          modelOverride: "gpt-5.4",
+          parseMode: "quality",
+          repairPass: true
+        })
       }, 1);
       if (!response.ok || !data.ok) {
         throw new Error(data.error || "生成失败");
@@ -1330,8 +1549,8 @@
       state.upload.usage = data.usage || null;
       state.upload.interaction = createSceneInteractionState(preparedScene);
       state.upload.successMessage = preparedScene.validation?.quality_gate_passed
-        ? "生成成功，已输出可交互电路图。"
-        : "已生成结果，但存在待复核的结构问题。";
+        ? `生成成功，已使用 ${modelConfig.label} 输出可交互电路图。`
+        : `已使用 ${modelConfig.label} 生成结果，但存在待复核的结构问题。`;
     } catch (error) {
       if (isTransientFetchError(error)) {
         const healthy = await checkLocalServiceHealth();

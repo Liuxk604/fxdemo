@@ -554,13 +554,14 @@ body {
 }
 
 .scene-stage--upload {
-  min-height: 680px;
+  min-height: 720px;
   display: grid;
 }
 
 .scene-stage--upload svg {
   width: 100%;
-  height: 100%;
+  height: 100% !important;
+  display: block;
 }
 
 .scene-stage svg {
@@ -785,6 +786,8 @@ body {
 
 .kv-item--compact strong {
   font-size: 18px;
+  line-height: 1.25;
+  word-break: break-word;
 }
 
 .trend {
