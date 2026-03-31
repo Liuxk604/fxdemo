@@ -18,9 +18,6 @@
 
   const baseRenderPreviewCard = renderPreviewCard;
   const DEFAULT_STROKE = "#1f2e2b";
-  const UPLOAD_MAX_DIMENSION = 1280;
-  const UPLOAD_JPEG_QUALITY = 0.62;
-  const UPLOAD_MIN_COMPRESSION_BYTES = 120 * 1024;
 
   function escapeUploadHtml(value) {
     return String(value ?? "")
@@ -46,76 +43,28 @@
     });
   }
 
-  function blobToFile(blob, fileName) {
-    return new File([blob], fileName.replace(/\.(png|jpe?g)$/i, ".jpg"), {
-      type: blob.type || "image/jpeg",
-      lastModified: Date.now()
-    });
-  }
-
-  function canvasToBlob(canvas, type, quality) {
+  function loadUploadImageMeta(url) {
     return new Promise((resolve, reject) => {
-      canvas.toBlob((blob) => {
-        if (!blob) {
-          reject(new Error("图片压缩失败"));
-          return;
-        }
-        resolve(blob);
-      }, type, quality);
-    });
-  }
-
-  async function compressUploadImage(file) {
-    const sourceDataUrl = await readUploadFileAsDataUrl(file);
-    const image = await new Promise((resolve, reject) => {
       const img = new Image();
-      img.onload = () => resolve(img);
-      img.onerror = () => reject(new Error("图片压缩失败"));
-      img.src = sourceDataUrl;
+      img.onload = () => resolve({
+        width: img.naturalWidth,
+        height: img.naturalHeight
+      });
+      img.onerror = () => reject(new Error("图片尺寸读取失败"));
+      img.src = url;
     });
-
-    const scale = Math.min(1, UPLOAD_MAX_DIMENSION / Math.max(image.naturalWidth, image.naturalHeight));
-    const targetWidth = Math.max(1, Math.round(image.naturalWidth * scale));
-    const targetHeight = Math.max(1, Math.round(image.naturalHeight * scale));
-    const shouldCompress = scale < 1 || file.size >= UPLOAD_MIN_COMPRESSION_BYTES || file.type === "image/png";
-    if (!shouldCompress) {
-      return {
-        file,
-        imageDataUrl: sourceDataUrl,
-        width: image.naturalWidth,
-        height: image.naturalHeight
-      };
-    }
-
-    const canvas = document.createElement("canvas");
-    canvas.width = targetWidth;
-    canvas.height = targetHeight;
-    const context = canvas.getContext("2d", { alpha: false });
-    if (!context) throw new Error("图片压缩失败");
-
-    context.fillStyle = "#ffffff";
-    context.fillRect(0, 0, targetWidth, targetHeight);
-    context.drawImage(image, 0, 0, targetWidth, targetHeight);
-
-    const blob = await canvasToBlob(canvas, "image/jpeg", UPLOAD_JPEG_QUALITY);
-    const compressedFile = blobToFile(blob, file.name);
-    return {
-      file: compressedFile,
-      imageDataUrl: await readUploadFileAsDataUrl(compressedFile),
-      width: targetWidth,
-      height: targetHeight
-    };
   }
 
   async function uploadFileToPayload(file) {
-    const prepared = await compressUploadImage(file);
+    const imageDataUrl = await readUploadFileAsDataUrl(file);
+    const meta = await loadUploadImageMeta(imageDataUrl);
     return {
-      fileName: prepared.file.name,
-      mimeType: prepared.file.type || "image/jpeg",
-      width: prepared.width,
-      height: prepared.height,
-      imageDataUrl: prepared.imageDataUrl,
-      byteLength: prepared.file.size
+      fileName: file.name,
+      mimeType: file.type || "image/*",
+      width: meta.width,
+      height: meta.height,
+      imageDataUrl,
+      byteLength: file.size
     };
   }
 
@@ -350,8 +299,8 @@
     return {
       label: "GPT-5.4",
       model: "gpt-5.4",
-      parseMode: "fast",
-      repairPass: false
+      parseMode: "quality",
+      repairPass: true
     };
   }
 
@@ -1587,10 +1536,8 @@
           ...payload,
           provider: "openai",
           modelOverride: "gpt-5.4",
-          parseMode: "fast",
-          repairPass: false,
-          reasoningEffort: "low",
-          imageDetail: "low"
+          parseMode: "quality",
+          repairPass: true
         })
       }, 1);
       if (!response.ok || !data.ok) {
