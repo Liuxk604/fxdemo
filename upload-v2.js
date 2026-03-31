@@ -18,9 +18,9 @@
 
   const baseRenderPreviewCard = renderPreviewCard;
   const DEFAULT_STROKE = "#1f2e2b";
-  const UPLOAD_MAX_DIMENSION = 1600;
-  const UPLOAD_JPEG_QUALITY = 0.76;
-  const UPLOAD_MIN_COMPRESSION_BYTES = 280 * 1024;
+  const UPLOAD_MAX_DIMENSION = 1280;
+  const UPLOAD_JPEG_QUALITY = 0.62;
+  const UPLOAD_MIN_COMPRESSION_BYTES = 120 * 1024;
 
   function escapeUploadHtml(value) {
     return String(value ?? "")
@@ -77,7 +77,7 @@
     const scale = Math.min(1, UPLOAD_MAX_DIMENSION / Math.max(image.naturalWidth, image.naturalHeight));
     const targetWidth = Math.max(1, Math.round(image.naturalWidth * scale));
     const targetHeight = Math.max(1, Math.round(image.naturalHeight * scale));
-    const shouldCompress = scale < 1 || file.size >= UPLOAD_MIN_COMPRESSION_BYTES;
+    const shouldCompress = scale < 1 || file.size >= UPLOAD_MIN_COMPRESSION_BYTES || file.type === "image/png";
     if (!shouldCompress) {
       return {
         file,
