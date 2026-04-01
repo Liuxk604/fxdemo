@@ -297,8 +297,8 @@
 
   function uploadModelConfig() {
     return {
-      label: "GPT-5.4",
-      model: "gpt-5.4",
+      label: "Poe GPT-5.4 Mini",
+      model: "gpt-5.4-mini",
       parseMode: "quality",
       repairPass: true
     };
@@ -1535,9 +1535,9 @@
         body: JSON.stringify({
           ...payload,
           provider: "openai",
-          modelOverride: "gpt-5.4",
-          parseMode: "quality",
-          repairPass: true
+          modelOverride: modelConfig.model,
+          parseMode: modelConfig.parseMode,
+          repairPass: modelConfig.repairPass
         })
       }, 1);
       if (!response.ok || !data.ok) {

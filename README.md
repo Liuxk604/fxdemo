@@ -81,9 +81,10 @@ image -> parser prompt -> scene json -> scene normalizer -> SVG renderer -> inte
 项目根目录放置 `.env` 文件：
 
 ```env
-OPENAI_API_KEY=your_api_key
-OPENAI_BASE_URL=https://api.yunxicode.online
-OPENAI_MODEL=gpt-5.4
+OPENAI_API_KEY=your_poe_api_key
+OPENAI_BASE_URL=https://api.poe.com/v1
+OPENAI_WIRE_API=chat_completions
+OPENAI_MODEL=gpt-5.4-mini
 OPENAI_PARSE_MODE=quality
 OPENAI_REASONING_EFFORT=low
 OPENAI_IMAGE_DETAIL=high
