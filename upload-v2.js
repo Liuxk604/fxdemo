@@ -1423,7 +1423,7 @@
             <div class="upload-loading-mask">
               <div class="upload-spinner"></div>
               <strong>正在生成交互电路图</strong>
-              <span>正在识别元件、导线和题图结构，请稍候。</span>
+              <span>正在识别元件、导线和题图结构，预计需要1-2分钟，请稍候。</span>
             </div>
           ` : ""}
         </div>
