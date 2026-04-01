@@ -297,8 +297,8 @@
 
   function uploadModelConfig() {
     return {
-      label: "Poe GPT-5.4 Mini",
-      model: "gpt-5.4-mini",
+      label: "Poe GPT-5.4",
+      model: "gpt-5.4",
       parseMode: "quality",
       repairPass: true
     };
