@@ -1,6 +1,8 @@
 ## 演示视频
 
-[点击查看演示视频 `public/fxdemo.mp4`](public/fxdemo.mp4)
+[![演示视频预览（点击打开 MP4）](public/fxdemo-preview.gif)](public/fxdemo.mp4)
+
+[完整演示视频 `public/fxdemo.mp4`](public/fxdemo.mp4)
 
 # fxdemo1
 
