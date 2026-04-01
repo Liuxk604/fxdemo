@@ -4,6 +4,10 @@
 
 [完整演示视频 `public/fxdemo.mp4`](public/fxdemo.mp4)
 
+
+# 在线访问地址
+http://43.159.135.17:6080/
+
 # fxdemo1
 
 飞象 Circuit Lab 演示项目。
