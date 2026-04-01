@@ -752,6 +752,11 @@ body {
   accent-color: var(--accent);
 }
 
+body.is-dragging-slider {
+  user-select: none;
+  cursor: grabbing;
+}
+
 .kv-item {
   display: flex;
   align-items: center;
@@ -829,6 +834,24 @@ body {
   fill: none;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+.scene-slider-track {
+  stroke: rgba(77, 102, 176, 0.45);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.scene-slider-handle {
+  fill: #4a7cff;
+  stroke: #ffffff;
+  stroke-width: 3;
+  filter: drop-shadow(0 4px 10px rgba(74, 124, 255, 0.32));
+}
+
+.scene-slider-hit {
+  fill: transparent;
+  cursor: grab;
 }
 
 .wire,

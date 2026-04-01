@@ -15,6 +15,7 @@
   }
 
   state.upload = state.upload || createUploadState();
+  let uploadSliderDrag = null;
 
   const baseRenderPreviewCard = renderPreviewCard;
   const DEFAULT_STROKE = "#1f2e2b";
@@ -135,6 +136,54 @@
     return Object.prototype.hasOwnProperty.call(state.upload.interaction, key)
       ? state.upload.interaction[key]
       : fallback;
+  }
+
+  function getUploadSceneSvg() {
+    return app.querySelector('.scene-stage--upload svg');
+  }
+
+  function getUploadSvgPointFromEvent(event) {
+    const svg = getUploadSceneSvg();
+    if (!svg || typeof svg.createSVGPoint !== "function") return null;
+    const matrix = svg.getScreenCTM();
+    if (!matrix) return null;
+    const point = svg.createSVGPoint();
+    point.x = event.clientX;
+    point.y = event.clientY;
+    const translated = point.matrixTransform(matrix.inverse());
+    return { x: translated.x, y: translated.y };
+  }
+
+  function updateUploadSliderFromPoint(point, dragState) {
+    if (!point || !dragState) return;
+    const min = Number.isFinite(dragState.min) ? dragState.min : 0;
+    const max = Number.isFinite(dragState.max) ? dragState.max : 1;
+    const span = dragState.axis === "y"
+      ? (dragState.y2 - dragState.y1)
+      : (dragState.x2 - dragState.x1);
+    const rawRatio = dragState.axis === "y"
+      ? ((point.y - dragState.y1) / (span || 1))
+      : ((point.x - dragState.x1) / (span || 1));
+    const ratio = clamp(rawRatio, 0, 1);
+    const value = min + (max - min) * ratio;
+    const key = `${dragState.componentId}.${dragState.param}`;
+    state.upload.interaction[key] = value;
+    renderApp();
+  }
+
+  function stopUploadSliderDrag() {
+    if (!uploadSliderDrag) return;
+    window.removeEventListener("pointermove", handleUploadSliderPointerMove);
+    window.removeEventListener("pointerup", stopUploadSliderDrag);
+    window.removeEventListener("pointercancel", stopUploadSliderDrag);
+    document.body.classList.remove("is-dragging-slider");
+    uploadSliderDrag = null;
+  }
+
+  function handleUploadSliderPointerMove(event) {
+    if (!uploadSliderDrag) return;
+    event.preventDefault();
+    updateUploadSliderFromPoint(getUploadSvgPointFromEvent(event), uploadSliderDrag);
   }
 
   function cloneScene(scene) {
@@ -1226,19 +1275,44 @@
   function renderFallbackVariableResistor(component, active) {
     const { bbox, anchors, interactive } = resolveComponentGeometry(component);
     const cls = active ? "scene-component scene-component--active" : "scene-component";
-    const track = interactive.track;
-    const tap = anchors.tap;
+    const track = interactive.track || {
+      x1: bbox[0] + 10,
+      y1: bbox[1] - 18,
+      x2: bbox[0] + bbox[2] - 10,
+      y2: bbox[1] - 18
+    };
+    const tap = anchors.tap || interactive.handle || { x: track.x1, y: track.y1 };
+    const handle = interactive.handle || tap;
     const bodyLeft = anchors.body_left;
     const bodyRight = anchors.body_right;
+    const axis = interactive.axis || (Math.abs(track.x2 - track.x1) >= Math.abs(track.y2 - track.y1) ? "x" : "y");
     return `
       <g class="${cls}">
         <line x1="${bodyLeft.x - 18}" y1="${bodyLeft.y}" x2="${bodyLeft.x}" y2="${bodyLeft.y}" class="scene-line"></line>
         <rect x="${bbox[0]}" y="${bbox[1]}" width="${bbox[2]}" height="${bbox[3]}" rx="4" class="scene-shell"></rect>
         <line x1="${bodyRight.x}" y1="${bodyRight.y}" x2="${bodyRight.x + 18}" y2="${bodyRight.y}" class="scene-line"></line>
+        <line x1="${track.x1}" y1="${track.y1}" x2="${track.x2}" y2="${track.y2}" class="scene-slider-track"></line>
         <line x1="${tap.x}" y1="${tap.y}" x2="${tap.x}" y2="${bbox[1] + 2}" class="scene-line"></line>
         <polygon points="${tap.x},${bbox[1] + 4} ${tap.x - 7},${bbox[1] - 8} ${tap.x + 7},${bbox[1] - 8}" class="scene-arrow"></polygon>
         <text x="${tap.x}" y="${track.y1 - 12}" text-anchor="middle" class="scene-inline-label">P</text>
         <circle cx="${bodyLeft.x}" cy="${bodyLeft.y}" r="4.2" class="scene-node scene-node--solid"></circle>
+        <circle cx="${handle.x}" cy="${handle.y}" r="8" class="scene-slider-handle"></circle>
+        <circle
+          cx="${handle.x}"
+          cy="${handle.y}"
+          r="18"
+          class="scene-slider-hit"
+          data-action="upload-drag-slider"
+          data-component="${component.id}"
+          data-param="slider_position"
+          data-min="0"
+          data-max="1"
+          data-axis="${axis}"
+          data-x1="${track.x1}"
+          data-y1="${track.y1}"
+          data-x2="${track.x2}"
+          data-y2="${track.y2}"
+        ></circle>
         ${component.params?.connection_mode === "tap_to_right" ? `<line x1="${bodyRight.x}" y1="${bodyRight.y}" x2="${bodyRight.x + 10}" y2="${bodyRight.y}" class="scene-line"></line>` : ""}
       </g>
     `;
@@ -1582,6 +1656,30 @@
         state.upload.interaction[key] = !state.upload.interaction[key];
         renderApp();
       }
+    });
+
+    app.addEventListener("pointerdown", (event) => {
+      const sliderHit = event.target.closest('[data-action="upload-drag-slider"]');
+      if (!sliderHit || state.upload.loading) return;
+      event.preventDefault();
+
+      uploadSliderDrag = {
+        componentId: sliderHit.dataset.component,
+        param: sliderHit.dataset.param,
+        min: Number(sliderHit.dataset.min ?? 0),
+        max: Number(sliderHit.dataset.max ?? 1),
+        axis: sliderHit.dataset.axis === "y" ? "y" : "x",
+        x1: Number(sliderHit.dataset.x1 ?? 0),
+        y1: Number(sliderHit.dataset.y1 ?? 0),
+        x2: Number(sliderHit.dataset.x2 ?? 0),
+        y2: Number(sliderHit.dataset.y2 ?? 0)
+      };
+
+      document.body.classList.add("is-dragging-slider");
+      window.addEventListener("pointermove", handleUploadSliderPointerMove);
+      window.addEventListener("pointerup", stopUploadSliderDrag);
+      window.addEventListener("pointercancel", stopUploadSliderDrag);
+      updateUploadSliderFromPoint(getUploadSvgPointFromEvent(event), uploadSliderDrag);
     });
 
     app.addEventListener("input", (event) => {
