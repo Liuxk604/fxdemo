@@ -1,3 +1,7 @@
+## 演示视频
+
+[点击查看演示视频 `public/fxdemo.mp4`](public/fxdemo.mp4)
+
 # fxdemo1
 
 飞象 Circuit Lab 演示项目。
